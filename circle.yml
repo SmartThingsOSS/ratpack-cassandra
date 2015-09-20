@@ -1,0 +1,15 @@
+machine:
+  java:
+    version:
+      oraclejdk8
+
+dependencies:
+  override:
+    - ./gradlew classes testClasses
+
+test:
+  override:
+    - ./gradlew check
+
+  post:
+    - 'find . -type f -name "*.xml" | grep "build/test-results" | xargs cp -t $CIRCLE_TEST_REPORTS/'
