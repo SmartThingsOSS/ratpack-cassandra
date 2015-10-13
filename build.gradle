@@ -1,0 +1,45 @@
+def jvmEncoding = java.nio.charset.Charset.defaultCharset().name()
+if (jvmEncoding != "UTF-8") {
+	throw new IllegalStateException("Build environment must be UTF-8 (it is: $jvmEncoding) - add '-Dfile.encoding=UTF-8' to the GRADLE_OPTS environment variable ")
+}
+
+if (!JavaVersion.current().java8Compatible) {
+	throw new IllegalStateException("Must be built with Java 8 or higher")
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = "2.7"
+}
+
+subprojects {
+	group = "smartthings.ratpack"
+	version = rootProject.file('version.txt').text.trim()
+
+	apply plugin: "base"
+	apply plugin: "groovy"
+	apply plugin: "maven-publish"
+	apply plugin: "jacoco"
+	apply plugin: 'idea'
+
+	sourceCompatibility = "1.8"
+	targetCompatibility = "1.8"
+
+	repositories {
+		mavenLocal()
+		jcenter()
+	}
+
+	task sourceJar(type: Jar) {
+		classifier "sources"
+		from sourceSets.main.allJava
+	}
+
+	publishing {
+		publications {
+			main(MavenPublication) {
+				from components.java
+				Artifact sourceJar
+			}
+		}
+	}
+}
