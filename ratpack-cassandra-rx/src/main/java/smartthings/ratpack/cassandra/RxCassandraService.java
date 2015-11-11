@@ -22,12 +22,11 @@ public class RxCassandraService {
 	}
 
 	public Observable<ResultSet> executeAndReturnResultSet(Statement statement) {
-		return observe(cassandraService.executeAsync(statement));
+		return observe(cassandraService.execute(statement));
 	}
 
 	public Observable<Row> execute(Statement... statements) {
 		List<Observable<ResultSet>> resultSets = Lists.transform(Arrays.asList(statements), this::executeAndReturnResultSet);
-		return Observable.merge(resultSets).flatMap(rs ->
-			Observable.from(rs.all()));
+		return Observable.merge(resultSets).flatMap(Observable::from);
 	}
 }
