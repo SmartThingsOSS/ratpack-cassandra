@@ -26,9 +26,9 @@ public class CassandraService implements Service {
 
 		PerHostPercentileTracker tracker = PerHostPercentileTracker.builderWithHighestTrackableLatencyMillis(2000).build();
 
-		//TODO fix constructor
 		Cluster.Builder builder = Cluster.builder()
 			.withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+			.withNettyOptions(new RatpackCassandraNettyOptions())
 			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
 
 		for (String seed : cassandraConfig.seeds) {
@@ -84,7 +84,7 @@ public class CassandraService implements Service {
 		return ctx;
 	}
 
-	public Promise<ResultSet> executeAsync(Statement statement) {
+	public Promise<ResultSet> execute(Statement statement) {
 		return Promise.of(upstream -> {
 			ResultSetFuture resultSetFuture = session.executeAsync(statement);
 			upstream.accept(resultSetFuture);
