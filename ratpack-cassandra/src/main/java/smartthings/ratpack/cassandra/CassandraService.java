@@ -5,6 +5,8 @@ import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.EC2MultiRegionAddressTranslater;
 import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ratpack.exec.Promise;
 import ratpack.server.Service;
 import ratpack.server.StopEvent;
@@ -22,12 +24,17 @@ public class CassandraService implements Service {
 	private final Session session;
 	private final String[] cipherSuites = new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"};
 
+	private Logger logger = LoggerFactory.getLogger(CassandraService.class);
+
 	public CassandraService(CassandraModule.Config cassandraConfig) {
 
-		PerHostPercentileTracker tracker = PerHostPercentileTracker.builderWithHighestTrackableLatencyMillis(2000).build();
+		//Set the highest tracking to just above the socket timeout for the read.
+		PerHostPercentileTracker tracker = PerHostPercentileTracker.builderWithHighestTrackableLatencyMillis(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
+
+		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(1).build();
 
 		Cluster.Builder builder = Cluster.builder()
-			.withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+			.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
 			.withNettyOptions(new RatpackCassandraNettyOptions())
 			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
 
@@ -47,7 +54,7 @@ public class CassandraService implements Service {
 				SSLContext sslContext = getSSLContext(cassandraConfig.truststore.path, cassandraConfig.truststore.password, cassandraConfig.keystore.path, cassandraConfig.keystore.password);
 				builder.withSSL(new SSLOptions(sslContext, cipherSuites));
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.error("Couldn't add SSL to the cluster builder.", e);
 			}
 		}
 
