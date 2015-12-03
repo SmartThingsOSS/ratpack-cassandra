@@ -53,6 +53,7 @@ public class CassandraMigrationService implements Service {
 			MigrationParameters parameters = builder.build();
 			migrationRunner.run(parameters);
 		} else {
+			//We should consider deprecating this and just not using the migration service if we don't want migrations.
 			logger.info("Not Migrating as the module is configured to not auto migrate.");
 		}
 	}
