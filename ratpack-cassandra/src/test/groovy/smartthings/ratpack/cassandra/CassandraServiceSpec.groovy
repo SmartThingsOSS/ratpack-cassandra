@@ -1,0 +1,67 @@
+package smartthings.ratpack.cassandra
+
+import com.datastax.driver.core.exceptions.NoHostAvailableException
+import org.cassandraunit.CassandraCQLUnit
+import org.cassandraunit.dataset.CQLDataSet
+import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
+import spock.lang.AutoCleanup
+import spock.lang.Shared
+import spock.lang.Specification
+import ratpack.test.exec.ExecHarness
+
+class CassandraServiceSpec extends Specification {
+
+	@Shared
+	CassandraCQLUnit cassandraCQLUnit
+
+	@AutoCleanup
+	ExecHarness harness = ExecHarness.harness()
+
+	private static final String TEST_KEYSPACE = "ratpack_cassandra_test"
+
+	//This is set in test-cassandra.yaml
+	private static final String TEST_SEED = "localhost:9142"
+
+	def setupSpec() {
+		CQLDataSet dataSet = new ClassPathCQLDataSet('test-baseline.cql', TEST_KEYSPACE)
+		cassandraCQLUnit = new CassandraCQLUnit(dataSet, 'test-cassandra.yaml')
+		cassandraCQLUnit.before()
+	}
+
+	def cleanupSpec() {
+		cassandraCQLUnit.after()
+	}
+
+	def "Establish a connection and get a session object"() {
+		given:
+		CassandraModule.Config cassConfig = new CassandraModule.Config()
+		cassConfig.setKeyspace(TEST_KEYSPACE)
+		cassConfig.setSeeds([TEST_SEED])
+		CassandraService service
+
+		when:
+		harness.run {
+			service = new CassandraService(cassConfig)
+		}
+
+		then:
+		service.getSession()
+	}
+
+	def "Error on bad connection"() {
+		given:
+		CassandraModule.Config cassConfig = new CassandraModule.Config()
+		cassConfig.setKeyspace(TEST_KEYSPACE)
+		cassConfig.setSeeds(["localhost:1111"])
+		CassandraService service
+
+		when:
+		harness.run {
+			service = new CassandraService(cassConfig)
+		}
+
+		then:
+		thrown(NoHostAvailableException)
+	}
+
+}

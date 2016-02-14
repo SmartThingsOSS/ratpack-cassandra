@@ -8,5 +8,9 @@ dependencies {
 	compile 'org.xerial.snappy:snappy-java:1.1.2.1'
 
 	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+	testCompile "io.ratpack:ratpack-groovy-test:${ratpackVersion}"
+	//Note cassandra unit pulls in netty-all which may need changed if the version conflicts with Ratpacks
+	testCompile 'org.cassandraunit:cassandra-unit:2.1.9.2'
+	testRuntime 'cglib:cglib-nodep:3.2.0'
 	testRuntime 'org.objenesis:objenesis:2.2'
 }
