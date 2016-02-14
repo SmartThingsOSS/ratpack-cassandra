@@ -48,6 +48,13 @@ subprojects {
 		from sourceSets.main.allJava
 	}
 
+	jacocoTestReport {
+  	reports {
+	    xml.enabled true
+		}
+	}
+
+
 	publishing {
 		publications {
 			main(MavenPublication) {
