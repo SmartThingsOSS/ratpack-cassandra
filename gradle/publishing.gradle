@@ -71,14 +71,14 @@ bintray {
 	publish = true
 	pkg {
 		repo = 'maven'
-		name = 'smartthings.ratpack-bearer-auth'
+		name = 'smartthings.ratpack-cassandra'
 		userOrg = 'smartthingsoss'
 		licenses = ['Apache-2.0']
-		desc = 'Use spring security to authenticate ratpack'
-		labels = ['ratpack', 'auth']
-		websiteUrl = 'https://github.com/SmartThingsOSS/ratpack-bearer-auth'
-		issueTrackerUrl = 'https://github.com/SmartThingsOSS/ratpack-bearer-auth/issues'
-		vcsUrl = 'https://github.com/SmartThingsOSS/ratpack-bearer-auth.git'
+		desc = 'Working with Cassandra in Ratpack'
+		labels = ['ratpack', 'cassandra']
+		websiteUrl = 'https://github.com/SmartThingsOSS/ratpack-cassandra'
+		issueTrackerUrl = 'https://github.com/SmartThingsOSS/ratpack-cassandra/issues'
+		vcsUrl = 'https://github.com/SmartThingsOSS/ratpack-cassandra.git'
 		version {
 			name = project.version
 			vcsTag = project.version
