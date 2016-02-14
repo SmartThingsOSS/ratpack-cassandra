@@ -1,3 +1,14 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+	}
+}
+
+
 def jvmEncoding = java.nio.charset.Charset.defaultCharset().name()
 if (jvmEncoding != "UTF-8") {
 	throw new IllegalStateException("Build environment must be UTF-8 (it is: $jvmEncoding) - add '-Dfile.encoding=UTF-8' to the GRADLE_OPTS environment variable ")
@@ -8,10 +19,12 @@ if (!JavaVersion.current().java8Compatible) {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = "2.9"
+	gradleVersion = "2.11"
 }
 
 subprojects {
+
+
 	group = "smartthings.ratpack"
 	version = rootProject.file('version.txt').text.trim()
 
@@ -20,6 +33,7 @@ subprojects {
 	apply plugin: "maven-publish"
 	apply plugin: "jacoco"
 	apply plugin: 'idea'
+	apply plugin: 'com.github.ben-manes.versions'
 
 	sourceCompatibility = "1.8"
 	targetCompatibility = "1.8"

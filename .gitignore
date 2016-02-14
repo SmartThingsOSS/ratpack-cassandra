@@ -1,6 +1,7 @@
 *.class
 out/
 build/
+target/
 .gradle/
 .idea/
 *.iml
