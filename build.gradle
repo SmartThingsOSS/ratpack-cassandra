@@ -5,6 +5,7 @@ buildscript {
 
 	dependencies {
 		classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
 	}
 }
 
@@ -34,6 +35,8 @@ subprojects {
 	apply plugin: "jacoco"
 	apply plugin: 'idea'
 	apply plugin: 'com.github.ben-manes.versions'
+  apply from: rootProject.file('gradle/publishing.gradle')
+
 
 	sourceCompatibility = "1.8"
 	targetCompatibility = "1.8"
@@ -43,24 +46,9 @@ subprojects {
 		jcenter()
 	}
 
-	task sourceJar(type: Jar) {
-		classifier "sources"
-		from sourceSets.main.allJava
-	}
-
 	jacocoTestReport {
   	reports {
 	    xml.enabled true
-		}
-	}
-
-
-	publishing {
-		publications {
-			main(MavenPublication) {
-				from components.java
-				Artifact sourceJar
-			}
 		}
 	}
 }

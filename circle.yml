@@ -14,3 +14,14 @@ test:
   post:
     - 'find . -type f -name "*.xml" | grep "build/test-results" | xargs cp -t $CIRCLE_TEST_REPORTS/'
     - bash <(curl -s https://codecov.io/bash)
+
+deployment:
+  snapshot:
+    branch: master
+    commands:
+      - ./gradlew publish -PsmartThingsArtifactoryUserName=$ARTIFACTORY_USERNAME -PsmartThingsArtifactoryPassword=$ARTIFACTORY_PASSWORD
+
+  release:
+    branch: release
+    commands:
+      - ./gradlew bintrayUpload
