@@ -9,7 +9,8 @@ dependencies:
 
 test:
   override:
-    - ./gradlew check
+    - ./gradlew check jacocoTestReport
 
   post:
     - 'find . -type f -name "*.xml" | grep "build/test-results" | xargs cp -t $CIRCLE_TEST_REPORTS/'
+    - bash <(curl -s https://codecov.io/bash)
