@@ -12,7 +12,7 @@ public class CassandraMigrationService implements Service {
 
 	private Logger logger = LoggerFactory.getLogger(CassandraMigrationService.class);
 
-	CassandraModule.Config config;
+	private CassandraModule.Config config;
 
 	@Inject
 	public CassandraMigrationService(CassandraModule.Config config) {
@@ -22,7 +22,7 @@ public class CassandraMigrationService implements Service {
 	@Override
 	public void onStart(StartEvent event) throws Exception {
 		if (config.autoMigrate) {
-			logger.info("Auto Migrating");
+			logger.info("Auto Migrating Cassandra");
 			MigrationRunner migrationRunner = new MigrationRunner();
 
 			MigrationParameters.Builder builder = new MigrationParameters.Builder()
@@ -53,7 +53,7 @@ public class CassandraMigrationService implements Service {
 			MigrationParameters parameters = builder.build();
 			migrationRunner.run(parameters);
 		} else {
-			//We should consider deprecating this and just not using the migration service if we don't want migrations.
+			//We should consider deprecating this and just not using the migration module if we don't want migrations.
 			logger.info("Not Migrating as the module is configured to not auto migrate.");
 		}
 	}
