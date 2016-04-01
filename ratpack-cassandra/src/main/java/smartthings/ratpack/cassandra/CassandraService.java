@@ -5,10 +5,12 @@ import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.EC2MultiRegionAddressTranslater;
 import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.exec.Promise;
 import ratpack.server.Service;
+import ratpack.server.StartEvent;
 import ratpack.server.StopEvent;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -20,14 +22,19 @@ import java.security.SecureRandom;
 
 public class CassandraService implements Service {
 
-	private final Cluster cluster;
-	private final Session session;
+	private Cluster cluster;
+	private Session session;
 	private final String[] cipherSuites = new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"};
+	private final CassandraModule.Config cassandraConfig;
 
 	private Logger logger = LoggerFactory.getLogger(CassandraService.class);
 
+	@Inject
 	public CassandraService(CassandraModule.Config cassandraConfig) {
+		this.cassandraConfig = cassandraConfig;
+	}
 
+	private void connect() {
 		//Set the highest tracking to just above the socket timeout for the read.
 		PerHostPercentileTracker tracker = PerHostPercentileTracker.builderWithHighestTrackableLatencyMillis(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
 
@@ -96,6 +103,11 @@ public class CassandraService implements Service {
 			ResultSetFuture resultSetFuture = session.executeAsync(statement);
 			upstream.accept(resultSetFuture);
 		});
+	}
+
+	@Override
+	public void onStart(StartEvent event) throws Exception {
+		connect();
 	}
 
 	@Override
