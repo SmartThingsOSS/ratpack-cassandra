@@ -1,6 +1,7 @@
 package smartthings.ratpack.cassandra;
 
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import ratpack.guice.ConfigurableModule;
 
@@ -130,19 +131,8 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 	@Override
 	protected void configure() {
-
-	}
-
-	@Provides
-	@Singleton
-	public CassandraService cassandraService(CassandraModule.Config config) {
-		return new CassandraService(config);
-	}
-
-	@Provides
-	@Singleton
-	public CassandraHealthCheck cassandraHealthCheck(CassandraModule.Config config, CassandraService cassandraService) {
-		return new CassandraHealthCheck(config, cassandraService.getSession());
+		bind(CassandraService.class).in(Scopes.SINGLETON);
+		bind(CassandraHealthCheck.class).in(Scopes.SINGLETON);
 	}
 
 }

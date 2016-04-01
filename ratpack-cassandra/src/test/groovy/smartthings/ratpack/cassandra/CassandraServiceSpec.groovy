@@ -4,6 +4,8 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException
 import org.cassandraunit.CassandraCQLUnit
 import org.cassandraunit.dataset.CQLDataSet
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
+import ratpack.registry.Registry
+import ratpack.server.StartEvent
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -42,6 +44,17 @@ class CassandraServiceSpec extends Specification {
 		when:
 		harness.run {
 			service = new CassandraService(cassConfig)
+			service.onStart(new StartEvent() {
+				@Override
+				Registry getRegistry() {
+					return Registry.empty()
+				}
+
+				@Override
+				boolean isReload() {
+					return false
+				}
+			})
 		}
 
 		then:
@@ -58,6 +71,17 @@ class CassandraServiceSpec extends Specification {
 		when:
 		harness.run {
 			service = new CassandraService(cassConfig)
+			service.onStart(new StartEvent() {
+				@Override
+				Registry getRegistry() {
+					return Registry.empty()
+				}
+
+				@Override
+				boolean isReload() {
+					return false
+				}
+			})
 		}
 
 		then:
