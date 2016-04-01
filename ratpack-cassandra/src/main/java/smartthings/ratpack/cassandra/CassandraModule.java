@@ -132,12 +132,7 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 	@Override
 	protected void configure() {
 		bind(CassandraService.class).in(Scopes.SINGLETON);
-	}
-
-	@Provides
-	@Singleton
-	public CassandraHealthCheck cassandraHealthCheck(CassandraModule.Config config, CassandraService cassandraService) {
-		return new CassandraHealthCheck(config, cassandraService.getSession());
+		bind(CassandraHealthCheck.class).in(Scopes.SINGLETON);
 	}
 
 }
