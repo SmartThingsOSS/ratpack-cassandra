@@ -3,6 +3,6 @@ dependencies {
 	compile "io.ratpack:ratpack-rx:${ratpackVersion}"
 
 	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-	testRuntime 'cglib:cglib-nodep:3.2.0'
+	testRuntime 'cglib:cglib-nodep:3.2.2'
 	testRuntime 'org.objenesis:objenesis:2.2'
 }

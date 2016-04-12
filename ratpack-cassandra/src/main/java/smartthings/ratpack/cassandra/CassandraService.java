@@ -36,14 +36,17 @@ public class CassandraService implements Service {
 
 	private void connect() {
 		//Set the highest tracking to just above the socket timeout for the read.
-		PerHostPercentileTracker tracker = PerHostPercentileTracker.builderWithHighestTrackableLatencyMillis(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
+		PerHostPercentileTracker tracker = PerHostPercentileTracker.builder(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
 
 		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(1).build();
 
 		Cluster.Builder builder = Cluster.builder()
 			.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
-			.withNettyOptions(new RatpackCassandraNettyOptions())
 			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
+
+		if (cassandraConfig.getShareEventLoopGroup()) {
+			builder.withNettyOptions(new RatpackCassandraNettyOptions());
+		}
 
 		for (String seed : cassandraConfig.seeds) {
 			if (seed.contains(":")) {
