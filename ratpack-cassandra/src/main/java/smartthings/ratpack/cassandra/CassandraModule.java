@@ -1,8 +1,6 @@
 package smartthings.ratpack.cassandra;
 
-import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.Singleton;
 import ratpack.guice.ConfigurableModule;
 
 import java.util.List;
@@ -25,6 +23,8 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		String keyspace;
 		String validationQuery = "SELECT * FROM system.schema_keyspaces";
+
+		Boolean shareEventLoopGroup = false;
 
 		String migrationFile = "/migrations/cql.changelog";
 		Boolean autoMigrate = false;
@@ -85,6 +85,14 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setValidationQuery(String validationQuery) {
 			this.validationQuery = validationQuery;
+		}
+
+		public Boolean getShareEventLoopGroup() {
+			return shareEventLoopGroup;
+		}
+
+		public void setShareEventLoopGroup(Boolean shareEventLoopGroup) {
+			this.shareEventLoopGroup = shareEventLoopGroup;
 		}
 
 		public String getMigrationFile() {

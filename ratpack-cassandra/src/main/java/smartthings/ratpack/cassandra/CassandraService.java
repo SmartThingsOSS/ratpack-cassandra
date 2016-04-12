@@ -42,8 +42,11 @@ public class CassandraService implements Service {
 
 		Cluster.Builder builder = Cluster.builder()
 			.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
-			.withNettyOptions(new RatpackCassandraNettyOptions())
 			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
+
+		if (cassandraConfig.getShareEventLoopGroup()) {
+			builder.withNettyOptions(new RatpackCassandraNettyOptions());
+		}
 
 		for (String seed : cassandraConfig.seeds) {
 			if (seed.contains(":")) {
