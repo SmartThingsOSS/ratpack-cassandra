@@ -2,7 +2,7 @@ package smartthings.ratpack.cassandra;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.EC2MultiRegionAddressTranslater;
+import com.datastax.driver.core.policies.EC2MultiRegionAddressTranslator;
 import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.google.inject.Inject;
@@ -36,7 +36,7 @@ public class CassandraService implements Service {
 
 	private void connect() {
 		//Set the highest tracking to just above the socket timeout for the read.
-		PerHostPercentileTracker tracker = PerHostPercentileTracker.builder(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
+		PerHostPercentileTracker tracker = PerHostPercentileTracker.builderWithHighestTrackableLatencyMillis(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
 
 		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(1).build();
 
@@ -57,12 +57,12 @@ public class CassandraService implements Service {
 			}
 		}
 
-		builder.withAddressTranslater(new EC2MultiRegionAddressTranslater());
+		builder.withAddressTranslator(new EC2MultiRegionAddressTranslator());
 
 		if (cassandraConfig.truststore != null) {
 			try {
 				SSLContext sslContext = getSSLContext(cassandraConfig.truststore.path, cassandraConfig.truststore.password, cassandraConfig.keystore.path, cassandraConfig.keystore.password);
-				builder.withSSL(new SSLOptions(sslContext, cipherSuites));
+				builder.withSSL(JdkSSLOptions.builder().withSSLContext(sslContext).withCipherSuites(cipherSuites).build());
 			} catch (Exception e) {
 				logger.error("Couldn't add SSL to the cluster builder.", e);
 			}
