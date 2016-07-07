@@ -5,7 +5,7 @@ import org.cassandraunit.CassandraCQLUnit
 import org.cassandraunit.dataset.CQLDataSet
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import ratpack.registry.Registry
-import ratpack.server.StartEvent
+import ratpack.service.StartEvent
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification

@@ -3,8 +3,8 @@ package smartthings.ratpack.cassandra;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ratpack.server.Service;
-import ratpack.server.StartEvent;
+import ratpack.service.Service;
+import ratpack.service.StartEvent;
 import smartthings.migration.MigrationParameters;
 import smartthings.migration.MigrationRunner;
 

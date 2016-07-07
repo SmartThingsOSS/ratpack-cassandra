@@ -1,6 +1,5 @@
 package smartthings.ratpack.cassandra;
 
-import com.datastax.driver.core.Session;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ public class CassandraHealthCheck implements HealthCheck {
 
 	@Override
 	public Promise<Result> check(Registry registry) throws Exception {
-		return Promise.of(upstream -> {
+		return Promise.async(upstream -> {
 			try {
 				cassandraService.getSession().execute(validationQuery);
 				upstream.success(Result.healthy());
