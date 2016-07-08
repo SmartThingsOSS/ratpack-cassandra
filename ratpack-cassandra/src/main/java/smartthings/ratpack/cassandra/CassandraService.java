@@ -9,9 +9,9 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.exec.Promise;
-import ratpack.server.Service;
-import ratpack.server.StartEvent;
-import ratpack.server.StopEvent;
+import ratpack.service.Service;
+import ratpack.service.StartEvent;
+import ratpack.service.StopEvent;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -102,7 +102,7 @@ public class CassandraService implements Service {
 	}
 
 	public Promise<ResultSet> execute(Statement statement) {
-		return Promise.of(upstream -> {
+		return Promise.async(upstream -> {
 			ResultSetFuture resultSetFuture = session.executeAsync(statement);
 			upstream.accept(resultSetFuture);
 		});
