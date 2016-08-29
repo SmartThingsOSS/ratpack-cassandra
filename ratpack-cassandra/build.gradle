@@ -3,14 +3,11 @@ dependencies {
 	compile "io.ratpack:ratpack-guice:${ratpackVersion}"
 
 	compile 'com.datastax.cassandra:cassandra-driver-core:3.1.0'
-	compile 'org.hdrhistogram:HdrHistogram:2.1.8'
+	compile 'org.hdrhistogram:HdrHistogram:2.1.9'
 	compile 'net.jpountz.lz4:lz4:1.3.0'
-	compile 'org.xerial.snappy:snappy-java:1.1.2.4'
+	compile 'org.xerial.snappy:snappy-java:1.1.2.6'
 
-	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
 	testCompile "io.ratpack:ratpack-groovy-test:${ratpackVersion}"
 	//Note cassandra unit pulls in netty-all which may need changed if the version conflicts with Ratpacks
 	testCompile 'org.cassandraunit:cassandra-unit:3.0.0.1'
-	testRuntime 'cglib:cglib-nodep:3.2.2'
-	testRuntime 'org.objenesis:objenesis:2.2'
 }
