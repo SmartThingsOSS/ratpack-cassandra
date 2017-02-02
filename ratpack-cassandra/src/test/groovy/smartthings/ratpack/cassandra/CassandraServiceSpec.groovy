@@ -1,5 +1,6 @@
 package smartthings.ratpack.cassandra
 
+import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
 import org.cassandraunit.CassandraCQLUnit
 import org.cassandraunit.dataset.CQLDataSet
@@ -41,9 +42,12 @@ class CassandraServiceSpec extends Specification {
 		cassConfig.setSeeds([TEST_SEED])
 		CassandraService service
 
+		CassandraModule module = new CassandraModule()
+		Cluster cluster = module.cluster(cassConfig)
+
 		when:
 		harness.run {
-			service = new CassandraService(cassConfig)
+			service = new CassandraService(new DefaultSession(cluster, cassConfig))
 			service.onStart(new StartEvent() {
 				@Override
 				Registry getRegistry() {
@@ -68,9 +72,12 @@ class CassandraServiceSpec extends Specification {
 		cassConfig.setSeeds(["localhost:1111"])
 		CassandraService service
 
+		CassandraModule module = new CassandraModule()
+		Cluster cluster = module.cluster(cassConfig)
+
 		when:
 		harness.run {
-			service = new CassandraService(cassConfig)
+			service = new CassandraService(new DefaultSession(cluster, cassConfig))
 			service.onStart(new StartEvent() {
 				@Override
 				Registry getRegistry() {

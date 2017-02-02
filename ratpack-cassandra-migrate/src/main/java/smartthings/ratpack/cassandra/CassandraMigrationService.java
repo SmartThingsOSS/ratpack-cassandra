@@ -10,7 +10,7 @@ import ratpack.service.StartEvent;
 import smartthings.migration.MigrationParameters;
 import smartthings.migration.MigrationRunner;
 
-@DependsOn(CassandraService.class)
+@DependsOn(Session.class)
 public class CassandraMigrationService implements Service {
 
 	private Logger logger = LoggerFactory.getLogger(CassandraMigrationService.class);
@@ -25,7 +25,7 @@ public class CassandraMigrationService implements Service {
 	@Override
 	public void onStart(StartEvent event) throws Exception {
 		if (config.autoMigrate) {
-			Session session = event.getRegistry().get(CassandraService.class).getSession();
+			Session session = event.getRegistry().get(Session.class);
 			logger.info("Auto Migrating Cassandra");
 			MigrationRunner migrationRunner = new MigrationRunner();
 

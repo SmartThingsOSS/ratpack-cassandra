@@ -1,6 +1,8 @@
 package smartthings.ratpack.cassandra
 
+import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.Host
+import com.datastax.driver.core.Session
 import org.cassandraunit.CassandraCQLUnit
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.junit.Rule
@@ -19,12 +21,15 @@ class MigrationIntegrationSpec extends Specification {
 		CassandraModule.Config config = new CassandraModule.Config(keyspace: 'test', migrationFile: 'changelog.txt', seeds: seeds, autoMigrate: true)
 		CassandraMigrationService service = new CassandraMigrationService(config)
 		StartEvent mockStartEvent = Mock()
+		CassandraModule cassandraModule = new CassandraModule()
+		Cluster cluster = cassandraModule.cluster(config)
 
 		and:
-		CassandraService cassandraService = new CassandraService(config)
+		CassandraService cassandraService = new CassandraService(new DefaultSession(cluster, config))
 
 		and:
 		def registry = new SimpleMutableRegistry()
+		registry.add(Session, cassandraService.session)
 		registry.add(CassandraService, cassandraService)
 
 		and:
