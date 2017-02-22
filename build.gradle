@@ -20,7 +20,7 @@ if (!JavaVersion.current().java8Compatible) {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = "2.11"
+	gradleVersion = "3.3"
 }
 
 subprojects {
