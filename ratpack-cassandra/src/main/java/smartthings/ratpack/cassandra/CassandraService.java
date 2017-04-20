@@ -44,10 +44,6 @@ public class CassandraService implements Service {
 			.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
 			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
 
-		if (cassandraConfig.getShareEventLoopGroup()) {
-			builder.withNettyOptions(new RatpackCassandraNettyOptions());
-		}
-
 		for (String seed : cassandraConfig.seeds) {
 			if (seed.contains(":")) {
 				String[] tokens = seed.split(":");
