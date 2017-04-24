@@ -25,7 +25,6 @@ task wrapper(type: Wrapper) {
 
 subprojects {
 
-
 	group = "smartthings"
 	version = rootProject.file('version.txt').text.trim()
 
@@ -36,7 +35,6 @@ subprojects {
 	apply plugin: 'idea'
 	apply plugin: 'com.github.ben-manes.versions'
 	apply from: rootProject.file('gradle/publishing.gradle')
-
 
 	sourceCompatibility = "1.8"
 	targetCompatibility = "1.8"

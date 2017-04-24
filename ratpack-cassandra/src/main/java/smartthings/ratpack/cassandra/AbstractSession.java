@@ -10,7 +10,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Map;
-import java.util.Optional;
 import ratpack.exec.Promise;
 import ratpack.service.Service;
 import ratpack.service.StartEvent;
@@ -26,17 +25,17 @@ import ratpack.service.StopEvent;
 public abstract class AbstractSession implements RatpackSession, Session, Service {
 
 	private final Cluster cluster;
-	private final Optional<String> keyspace;
+	private final String keyspace;
 	private Session delegate;
 
-	AbstractSession(Cluster cluster) {
+	public AbstractSession(Cluster cluster) {
 		this.cluster = cluster;
-		this.keyspace = Optional.empty();
+		this.keyspace = null;
 	}
 
-	AbstractSession(Cluster cluster, String keyspace) {
+	public AbstractSession(Cluster cluster, String keyspace) {
 		this.cluster = cluster;
-		this.keyspace = Optional.of(keyspace);
+		this.keyspace = keyspace;
 	}
 
 	@Override
@@ -212,6 +211,6 @@ public abstract class AbstractSession implements RatpackSession, Session, Servic
 	}
 
 	protected Session createDelegate() {
-		return (keyspace.isPresent()) ? cluster.connect(keyspace.get()) : cluster.connect();
+		return (keyspace != null && !keyspace.equals("")) ? cluster.connect(keyspace) : cluster.connect();
 	}
 }

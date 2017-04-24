@@ -1,6 +1,7 @@
 include 'ratpack-cassandra'
 include 'ratpack-cassandra-rx'
 include 'ratpack-cassandra-migrate'
+include 'ratpack-cassandra-tracing'
 
 rootProject.name='ratpack-cassandra-parent'
 
