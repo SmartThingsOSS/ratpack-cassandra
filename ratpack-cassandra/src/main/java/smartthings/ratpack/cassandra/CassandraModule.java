@@ -10,26 +10,33 @@ import java.util.List;
  */
 public class CassandraModule extends ConfigurableModule<CassandraModule.Config> {
 
-	public static class Config {
+	@Override
+	protected void configure() {
+		bind(CassandraService.class).in(Scopes.SINGLETON);
+		bind(CassandraHealthCheck.class).in(Scopes.SINGLETON);
+		bind(CustomRetryPolicy.class).in(Scopes.SINGLETON);
+	}
 
-		public Config() {
-		}
+	public static class Config {
 
 		JKSConfig truststore;
 		JKSConfig keystore;
-
 		String user;
 		String password;
-
 		String keyspace;
 		String validationQuery = "SELECT * FROM system.schema_keyspaces";
-
 		Boolean shareEventLoopGroup = false;
-
 		String migrationFile = "/migrations/cql.changelog";
 		Boolean autoMigrate = false;
-
 		List<String> seeds;
+		int protocolVersion = 2;
+		int readTimeoutMillis = 5000;
+		int defaultConsistencyLevel = 6;
+		boolean defaultIdempotence = false;
+		boolean retryQuery = false;
+
+		public Config() {
+		}
 
 		public JKSConfig getTruststore() {
 			return truststore;
@@ -111,6 +118,46 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 			this.autoMigrate = autoMigrate;
 		}
 
+		public int getProtocolVersion() {
+			return protocolVersion;
+		}
+
+		public void setProtocolVersion(int protocolVersion) {
+			this.protocolVersion = protocolVersion;
+		}
+
+		public int getReadTimeoutMillis() {
+			return readTimeoutMillis;
+		}
+
+		public void setReadTimeoutMillis(int readTimeoutMillis) {
+			this.readTimeoutMillis = readTimeoutMillis;
+		}
+
+		public int getDefaultConsistencyLevel() {
+			return defaultConsistencyLevel;
+		}
+
+		public void setDefaultConsistencyLevel(int defaultConsistencyLevel) {
+			this.defaultConsistencyLevel = defaultConsistencyLevel;
+		}
+
+		public boolean getDefaultIdempotence() {
+			return defaultIdempotence;
+		}
+
+		public void setDefaultIdempotence(boolean defaultIdempotence) {
+			this.defaultIdempotence = defaultIdempotence;
+		}
+
+		public boolean getRetryQuery() {
+			return retryQuery;
+		}
+
+		public void setRetryQuery(boolean retryQuery) {
+			this.retryQuery = retryQuery;
+		}
+
 		public static class JKSConfig {
 
 			String path;
@@ -135,12 +182,6 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 				this.password = password;
 			}
 		}
-	}
-
-	@Override
-	protected void configure() {
-		bind(CassandraService.class).in(Scopes.SINGLETON);
-		bind(CassandraHealthCheck.class).in(Scopes.SINGLETON);
 	}
 
 }

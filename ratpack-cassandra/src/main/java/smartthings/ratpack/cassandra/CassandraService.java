@@ -21,28 +21,48 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 
 public class CassandraService implements Service {
-
-	private Cluster cluster;
-	private Session session;
 	private final String[] cipherSuites = new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"};
 	private final CassandraModule.Config cassandraConfig;
-
+	private final CustomRetryPolicy customRetryPolicy;
+	protected Cluster cluster;
+	protected Session session;
 	private Logger logger = LoggerFactory.getLogger(CassandraService.class);
 
 	@Inject
-	public CassandraService(CassandraModule.Config cassandraConfig) {
+	public CassandraService(CassandraModule.Config cassandraConfig, CustomRetryPolicy customRetryPolicy) {
 		this.cassandraConfig = cassandraConfig;
+		this.customRetryPolicy = customRetryPolicy;
 	}
 
-	private void connect() {
+	protected static SSLContext getSSLContext(String truststorePath, String truststorePassword, String keystorePath, String keystorePassword) throws Exception {
+		FileInputStream tsf = new FileInputStream(truststorePath);
+		FileInputStream ksf = new FileInputStream(keystorePath);
+		SSLContext ctx = SSLContext.getInstance("SSL");
+
+		KeyStore ts = KeyStore.getInstance("JKS");
+		ts.load(tsf, truststorePassword.toCharArray());
+		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		tmf.init(ts);
+
+		KeyStore ks = KeyStore.getInstance("JKS");
+		ks.load(ksf, keystorePassword.toCharArray());
+		KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+		kmf.init(ks, keystorePassword.toCharArray());
+
+		ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+		return ctx;
+	}
+
+	protected Cluster.Builder builder() {
 		//Set the highest tracking to just above the socket timeout for the read.
 		PerHostPercentileTracker tracker = PerHostPercentileTracker.builder(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
 
 		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(1).build();
 
 		Cluster.Builder builder = Cluster.builder()
-			.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
-			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
+				.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
+				.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
 
 		if (cassandraConfig.getShareEventLoopGroup()) {
 			builder.withNettyOptions(new RatpackCassandraNettyOptions());
@@ -72,33 +92,26 @@ public class CassandraService implements Service {
 			builder.withCredentials(cassandraConfig.user, cassandraConfig.password);
 		}
 
-		cluster = builder.build();
+		builder.withProtocolVersion(ProtocolVersion.values()[cassandraConfig.protocolVersion]);
 
-		if (cassandraConfig.keyspace != null) {
-			session = cluster.connect(cassandraConfig.keyspace);
-		} else {
-			session = cluster.connect();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.setConsistencyLevel(ConsistencyLevel.values()[cassandraConfig.defaultConsistencyLevel]);
+		queryOptions.setDefaultIdempotence(cassandraConfig.defaultIdempotence);
+
+		if (cassandraConfig.retryQuery) {
+			cluster.getConfiguration().getSocketOptions().setReadTimeoutMillis(cassandraConfig.readTimeoutMillis);
+			builder.withRetryPolicy(customRetryPolicy);
 		}
+
+		return builder;
 	}
 
-	private static SSLContext getSSLContext(String truststorePath, String truststorePassword, String keystorePath, String keystorePassword) throws Exception {
-		FileInputStream tsf = new FileInputStream(truststorePath);
-		FileInputStream ksf = new FileInputStream(keystorePath);
-		SSLContext ctx = SSLContext.getInstance("SSL");
-
-		KeyStore ts = KeyStore.getInstance("JKS");
-		ts.load(tsf, truststorePassword.toCharArray());
-		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		tmf.init(ts);
-
-		KeyStore ks = KeyStore.getInstance("JKS");
-		ks.load(ksf, keystorePassword.toCharArray());
-		KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-
-		kmf.init(ks, keystorePassword.toCharArray());
-
-		ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
-		return ctx;
+	protected Session connect(Cluster cluster) {
+		if (cassandraConfig.keyspace != null) {
+			return cluster.connect(cassandraConfig.keyspace);
+		} else {
+			return cluster.connect();
+		}
 	}
 
 	public Promise<ResultSet> execute(Statement statement) {
@@ -110,7 +123,7 @@ public class CassandraService implements Service {
 
 	@Override
 	public void onStart(StartEvent event) throws Exception {
-		connect();
+		session = connect(builder().build());
 	}
 
 	@Override

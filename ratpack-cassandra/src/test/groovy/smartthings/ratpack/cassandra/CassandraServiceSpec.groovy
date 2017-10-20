@@ -6,10 +6,10 @@ import org.cassandraunit.dataset.CQLDataSet
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import ratpack.registry.Registry
 import ratpack.service.StartEvent
+import ratpack.test.exec.ExecHarness
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
-import ratpack.test.exec.ExecHarness
 
 class CassandraServiceSpec extends Specification {
 
@@ -39,11 +39,12 @@ class CassandraServiceSpec extends Specification {
 		CassandraModule.Config cassConfig = new CassandraModule.Config()
 		cassConfig.setKeyspace(TEST_KEYSPACE)
 		cassConfig.setSeeds([TEST_SEED])
+		CustomRetryPolicy customRetryPolicy = new CustomRetryPolicy();
 		CassandraService service
 
 		when:
 		harness.run {
-			service = new CassandraService(cassConfig)
+			service = new CassandraService(cassConfig, customRetryPolicy)
 			service.onStart(new StartEvent() {
 				@Override
 				Registry getRegistry() {
@@ -66,11 +67,12 @@ class CassandraServiceSpec extends Specification {
 		CassandraModule.Config cassConfig = new CassandraModule.Config()
 		cassConfig.setKeyspace(TEST_KEYSPACE)
 		cassConfig.setSeeds(["localhost:1111"])
+		CustomRetryPolicy customRetryPolicy = new CustomRetryPolicy();
 		CassandraService service
 
 		when:
 		harness.run {
-			service = new CassandraService(cassConfig)
+			service = new CassandraService(cassConfig, customRetryPolicy)
 			service.onStart(new StartEvent() {
 				@Override
 				Registry getRegistry() {
