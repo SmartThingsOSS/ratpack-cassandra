@@ -31,7 +31,7 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 		List<String> seeds;
 		int protocolVersion = 2;
 		int readTimeoutMillis = 5000;
-		int defaultConsistencyLevel = 6;
+		int defaultConsistencyLevel = 0;
 		boolean defaultIdempotence = false;
 		boolean retryQuery = false;
 
