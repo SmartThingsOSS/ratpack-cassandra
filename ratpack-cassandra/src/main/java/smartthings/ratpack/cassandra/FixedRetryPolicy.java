@@ -9,10 +9,14 @@ import com.datastax.driver.core.policies.RetryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CustomRetryPolicy implements RetryPolicy {
+/**
+ * A policy that defines a default behavior to adopt when a request fails.
+ * Difference of existing DefaultRetryPolicy is that use Client side retry count variable only. and available retry count fixed 3 times.
+ */
+public class FixedRetryPolicy implements RetryPolicy {
 	private int retryCount = 3;
 
-	private Logger logger = LoggerFactory.getLogger(CustomRetryPolicy.class);
+	private Logger logger = LoggerFactory.getLogger(FixedRetryPolicy.class);
 
 	@Override
 	public RetryDecision onReadTimeout(Statement stmnt, ConsistencyLevel cl, int requiredResponses, int receivedResponses, boolean dataReceived, int nbRetry) {

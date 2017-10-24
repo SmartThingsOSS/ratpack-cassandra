@@ -14,7 +14,7 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 	protected void configure() {
 		bind(CassandraService.class).in(Scopes.SINGLETON);
 		bind(CassandraHealthCheck.class).in(Scopes.SINGLETON);
-		bind(CustomRetryPolicy.class).in(Scopes.SINGLETON);
+		bind(FixedRetryPolicy.class).in(Scopes.SINGLETON);
 	}
 
 	public static class Config {

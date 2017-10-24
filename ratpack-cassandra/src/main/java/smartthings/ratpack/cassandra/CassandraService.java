@@ -23,13 +23,13 @@ import java.security.SecureRandom;
 public class CassandraService implements Service {
 	private final String[] cipherSuites = new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"};
 	private final CassandraModule.Config cassandraConfig;
-	private final CustomRetryPolicy customRetryPolicy;
+	private final FixedRetryPolicy customRetryPolicy;
 	protected Cluster cluster;
 	protected Session session;
 	private Logger logger = LoggerFactory.getLogger(CassandraService.class);
 
 	@Inject
-	public CassandraService(CassandraModule.Config cassandraConfig, CustomRetryPolicy customRetryPolicy) {
+	public CassandraService(CassandraModule.Config cassandraConfig, FixedRetryPolicy customRetryPolicy) {
 		this.cassandraConfig = cassandraConfig;
 		this.customRetryPolicy = customRetryPolicy;
 	}
