@@ -1,10 +1,7 @@
 package smartthings.ratpack.cassandra;
 
 import com.datastax.driver.core.*;
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.EC2MultiRegionAddressTranslator;
-import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
-import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.core.policies.*;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,15 +20,20 @@ import java.security.SecureRandom;
 public class CassandraService implements Service {
 	private final String[] cipherSuites = new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"};
 	private final CassandraModule.Config cassandraConfig;
-	private final FixedRetryPolicy customRetryPolicy;
 	protected Cluster cluster;
 	protected Session session;
+	private RetryPolicy retryPolicy;
 	private Logger logger = LoggerFactory.getLogger(CassandraService.class);
 
 	@Inject
-	public CassandraService(CassandraModule.Config cassandraConfig, FixedRetryPolicy customRetryPolicy) {
+	public CassandraService(CassandraModule.Config cassandraConfig) {
 		this.cassandraConfig = cassandraConfig;
-		this.customRetryPolicy = customRetryPolicy;
+	}
+
+	@Inject
+	public CassandraService(CassandraModule.Config cassandraConfig, RetryPolicy retryPolicy) {
+		this.cassandraConfig = cassandraConfig;
+		this.retryPolicy = retryPolicy;
 	}
 
 	protected static SSLContext getSSLContext(String truststorePath, String truststorePassword, String keystorePath, String keystorePassword) throws Exception {
@@ -92,17 +94,23 @@ public class CassandraService implements Service {
 			builder.withCredentials(cassandraConfig.user, cassandraConfig.password);
 		}
 
-		builder.withProtocolVersion(ProtocolVersion.values()[cassandraConfig.protocolVersion]);
-
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.setConsistencyLevel(ConsistencyLevel.values()[cassandraConfig.defaultConsistencyLevel]);
-		queryOptions.setDefaultIdempotence(cassandraConfig.defaultIdempotence);
-
-		if (cassandraConfig.retryQuery) {
-			cluster.getConfiguration().getSocketOptions().setReadTimeoutMillis(cassandraConfig.readTimeoutMillis);
-			builder.withRetryPolicy(customRetryPolicy);
+		if (cassandraConfig.protocolVersion != -1) {
+			builder.withProtocolVersion(ProtocolVersion.values()[cassandraConfig.protocolVersion]);
 		}
 
+		if (retryPolicy != null) {
+			builder.withRetryPolicy(retryPolicy);
+		}
+
+		QueryOptions queryOptions = new QueryOptions();
+		if (cassandraConfig.defaultConsistencyLevel != -1) {
+			queryOptions.setConsistencyLevel(ConsistencyLevel.values()[cassandraConfig.defaultConsistencyLevel]);
+		}
+
+		queryOptions.setDefaultIdempotence(cassandraConfig.defaultIdempotence);
+		builder.withQueryOptions(queryOptions);
+
+		builder.getConfiguration().getSocketOptions().setReadTimeoutMillis(cassandraConfig.readTimeoutMillis);
 		return builder;
 	}
 
@@ -123,7 +131,8 @@ public class CassandraService implements Service {
 
 	@Override
 	public void onStart(StartEvent event) throws Exception {
-		session = connect(builder().build());
+		cluster = builder().build();
+		session = connect(cluster);
 	}
 
 	@Override

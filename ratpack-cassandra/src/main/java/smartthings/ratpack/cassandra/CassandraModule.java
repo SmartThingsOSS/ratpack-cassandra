@@ -29,11 +29,10 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 		String migrationFile = "/migrations/cql.changelog";
 		Boolean autoMigrate = false;
 		List<String> seeds;
-		int protocolVersion = 2;
+		int protocolVersion = -1;
 		int readTimeoutMillis = 5000;
-		int defaultConsistencyLevel = 0;
+		int defaultConsistencyLevel = -1;
 		boolean defaultIdempotence = false;
-		boolean retryQuery = false;
 
 		public Config() {
 		}
@@ -148,14 +147,6 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setDefaultIdempotence(boolean defaultIdempotence) {
 			this.defaultIdempotence = defaultIdempotence;
-		}
-
-		public boolean getRetryQuery() {
-			return retryQuery;
-		}
-
-		public void setRetryQuery(boolean retryQuery) {
-			this.retryQuery = retryQuery;
 		}
 
 		public static class JKSConfig {

@@ -20,7 +20,7 @@ public class FixedRetryPolicy implements RetryPolicy {
 
 	@Override
 	public RetryDecision onReadTimeout(Statement stmnt, ConsistencyLevel cl, int requiredResponses, int receivedResponses, boolean dataReceived, int nbRetry) {
-		logger.warn("[CustomRetryPolicy]-onReadTimeout(), requiredResponses={}, receivedResponses={}, dataReceived={}, nbRetry={}", requiredResponses, receivedResponses, dataReceived, nbRetry);
+		logger.warn("onReadTimeout(), requiredResponses={}, receivedResponses={}, dataReceived={}, nbRetry={}", requiredResponses, receivedResponses, dataReceived, nbRetry);
 		if (dataReceived) {
 			return RetryDecision.ignore();
 		} else if (nbRetry < retryCount) {
@@ -32,16 +32,16 @@ public class FixedRetryPolicy implements RetryPolicy {
 
 	@Override
 	public RetryDecision onWriteTimeout(Statement stmnt, ConsistencyLevel cl, WriteType wt, int requiredResponses, int receivedResponses, int nbRetry) {
-		logger.warn("[CustomRetryPolicy]-onWriteTimeout(), requiredResponses={}, receivedResponses={}, nbRetry={}", requiredResponses, receivedResponses, nbRetry);
+		logger.warn("-onWriteTimeout(), requiredResponses={}, receivedResponses={}, nbRetry={}", requiredResponses, receivedResponses, nbRetry);
 		if (nbRetry < retryCount) {
-			return RetryDecision.retry(cl);
+			return wt == WriteType.BATCH_LOG ? RetryDecision.retry(cl) : RetryDecision.rethrow();
 		}
 		return RetryDecision.rethrow();
 	}
 
 	@Override
 	public RetryDecision onUnavailable(Statement stmnt, ConsistencyLevel cl, int requiredResponses, int receivedResponses, int nbRetry) {
-		logger.warn("[CustomRetryPolicy]-onUnavailable(), requiredResponses={}, receivedResponses={}, nbRetry={}", requiredResponses, receivedResponses, nbRetry);
+		logger.warn("onUnavailable(), requiredResponses={}, receivedResponses={}, nbRetry={}", requiredResponses, receivedResponses, nbRetry);
 		if (nbRetry < retryCount) {
 			return RetryDecision.tryNextHost(cl);
 		}
@@ -50,7 +50,7 @@ public class FixedRetryPolicy implements RetryPolicy {
 
 	@Override
 	public RetryDecision onRequestError(Statement statement, ConsistencyLevel cl, DriverException e, int nbRetry) {
-		logger.warn("[CustomRetryPolicy]-onRequestError(), nbRetry={}", nbRetry);
+		logger.warn("onRequestError(), nbRetry={}", nbRetry);
 		if (nbRetry < retryCount) {
 			return RetryDecision.tryNextHost(cl);
 		}

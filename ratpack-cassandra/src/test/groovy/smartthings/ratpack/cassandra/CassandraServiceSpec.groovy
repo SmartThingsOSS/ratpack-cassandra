@@ -1,6 +1,7 @@
 package smartthings.ratpack.cassandra
 
 import com.datastax.driver.core.exceptions.NoHostAvailableException
+import com.datastax.driver.core.policies.RetryPolicy
 import org.cassandraunit.CassandraCQLUnit
 import org.cassandraunit.dataset.CQLDataSet
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
@@ -39,12 +40,11 @@ class CassandraServiceSpec extends Specification {
 		CassandraModule.Config cassConfig = new CassandraModule.Config()
 		cassConfig.setKeyspace(TEST_KEYSPACE)
 		cassConfig.setSeeds([TEST_SEED])
-		CustomRetryPolicy customRetryPolicy = new CustomRetryPolicy();
 		CassandraService service
 
 		when:
 		harness.run {
-			service = new CassandraService(cassConfig, customRetryPolicy)
+			service = new CassandraService(cassConfig)
 			service.onStart(new StartEvent() {
 				@Override
 				Registry getRegistry() {
@@ -67,12 +67,11 @@ class CassandraServiceSpec extends Specification {
 		CassandraModule.Config cassConfig = new CassandraModule.Config()
 		cassConfig.setKeyspace(TEST_KEYSPACE)
 		cassConfig.setSeeds(["localhost:1111"])
-		CustomRetryPolicy customRetryPolicy = new CustomRetryPolicy();
 		CassandraService service
 
 		when:
 		harness.run {
-			service = new CassandraService(cassConfig, customRetryPolicy)
+			service = new CassandraService(cassConfig)
 			service.onStart(new StartEvent() {
 				@Override
 				Registry getRegistry() {
@@ -90,4 +89,59 @@ class CassandraServiceSpec extends Specification {
 		thrown(NoHostAvailableException)
 	}
 
+	def "Establish a connection and get a session object for FixedRetryPolicy"() {
+		given:
+		CassandraModule.Config cassConfig = new CassandraModule.Config()
+		cassConfig.setKeyspace(TEST_KEYSPACE)
+		cassConfig.setSeeds([TEST_SEED])
+		RetryPolicy fixedRetryPolicy = new FixedRetryPolicy();
+		CassandraService service
+
+		when:
+		harness.run {
+			service = new CassandraService(cassConfig, fixedRetryPolicy)
+			service.onStart(new StartEvent() {
+				@Override
+				Registry getRegistry() {
+					return Registry.empty()
+				}
+
+				@Override
+				boolean isReload() {
+					return false
+				}
+			})
+		}
+
+		then:
+		service.getSession()
+	}
+
+	def "Error on bad connection for FixedRetryPolicy"() {
+		given:
+		CassandraModule.Config cassConfig = new CassandraModule.Config()
+		cassConfig.setKeyspace(TEST_KEYSPACE)
+		cassConfig.setSeeds(["localhost:1111"])
+		RetryPolicy fixedRetryPolicy = new FixedRetryPolicy();
+		CassandraService service
+
+		when:
+		harness.run {
+			service = new CassandraService(cassConfig, fixedRetryPolicy)
+			service.onStart(new StartEvent() {
+				@Override
+				Registry getRegistry() {
+					return Registry.empty()
+				}
+
+				@Override
+				boolean isReload() {
+					return false
+				}
+			})
+		}
+
+		then:
+		thrown(NoHostAvailableException)
+	}
 }
