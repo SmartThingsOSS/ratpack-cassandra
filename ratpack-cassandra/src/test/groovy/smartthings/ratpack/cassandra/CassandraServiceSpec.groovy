@@ -1,15 +1,16 @@
 package smartthings.ratpack.cassandra
 
 import com.datastax.driver.core.exceptions.NoHostAvailableException
+import com.datastax.driver.core.policies.RetryPolicy
 import org.cassandraunit.CassandraCQLUnit
 import org.cassandraunit.dataset.CQLDataSet
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import ratpack.registry.Registry
 import ratpack.service.StartEvent
+import ratpack.test.exec.ExecHarness
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
-import ratpack.test.exec.ExecHarness
 
 class CassandraServiceSpec extends Specification {
 
@@ -88,4 +89,59 @@ class CassandraServiceSpec extends Specification {
 		thrown(NoHostAvailableException)
 	}
 
+	def "Establish a connection and get a session object for FixedRetryPolicy"() {
+		given:
+		CassandraModule.Config cassConfig = new CassandraModule.Config()
+		cassConfig.setKeyspace(TEST_KEYSPACE)
+		cassConfig.setSeeds([TEST_SEED])
+		RetryPolicy fixedRetryPolicy = new FixedRetryPolicy();
+		CassandraService service
+
+		when:
+		harness.run {
+			service = new CassandraService(cassConfig, fixedRetryPolicy)
+			service.onStart(new StartEvent() {
+				@Override
+				Registry getRegistry() {
+					return Registry.empty()
+				}
+
+				@Override
+				boolean isReload() {
+					return false
+				}
+			})
+		}
+
+		then:
+		service.getSession()
+	}
+
+	def "Error on bad connection for FixedRetryPolicy"() {
+		given:
+		CassandraModule.Config cassConfig = new CassandraModule.Config()
+		cassConfig.setKeyspace(TEST_KEYSPACE)
+		cassConfig.setSeeds(["localhost:1111"])
+		RetryPolicy fixedRetryPolicy = new FixedRetryPolicy();
+		CassandraService service
+
+		when:
+		harness.run {
+			service = new CassandraService(cassConfig, fixedRetryPolicy)
+			service.onStart(new StartEvent() {
+				@Override
+				Registry getRegistry() {
+					return Registry.empty()
+				}
+
+				@Override
+				boolean isReload() {
+					return false
+				}
+			})
+		}
+
+		then:
+		thrown(NoHostAvailableException)
+	}
 }
