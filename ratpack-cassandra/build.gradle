@@ -2,7 +2,7 @@ dependencies {
 	compile "io.ratpack:ratpack-core:${ratpackVersion}"
 	compile "io.ratpack:ratpack-guice:${ratpackVersion}"
 
-	compile 'com.datastax.cassandra:cassandra-driver-core:3.3.0'
+	compile 'com.datastax.cassandra:cassandra-driver-core:3.4.0'
 	compile 'org.hdrhistogram:HdrHistogram:2.1.9'
 	compile 'net.jpountz.lz4:lz4:1.3.0'
 	compile 'org.xerial.snappy:snappy-java:1.1.2.6'
