@@ -1,0 +1,115 @@
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/openjdk:8-jdk-browsers
+  environment:
+    GRADLE_USER_HOME: ~/repo/.gradle
+
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+
+    steps:
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - repo-v1-{{ .Branch }}-{{ .Revision}}
+            - repo-v1-{{ .Branch }}-
+            - repo-v1-
+
+      - checkout
+
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - ./*
+
+
+  test:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: Gradle Check and Coverage
+          command: ./gradlew check jacocoTestReport
+
+      - run:
+          name: Codecov
+          command: bash <(curl -s https://codecov.io/bash)
+
+      - run:
+          name: Files
+          command: find . -type f -name "*.xml" | grep "build/test-results"
+
+      - run:
+          name: Test Results Folder
+          command: mkdir ~/test-results
+
+      - run:
+          name: Copy Test Results
+          command: find . -type f -name "*.xml" | grep "build/test-results" | xargs cp -t ~/test-results/
+
+      - store_test_results:
+          path: ~/test-results
+
+      - save_cache:
+          paths:
+            - ~/repo
+          key: repo-v1-{{ .Branch }}-{{ .Revision }}
+
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - ./*
+
+  release_snapshot:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: Publish Snapshot
+          command: ./gradlew publish -PsmartThingsUserName=$ARTIFACTORY_USERNAME -PsmartThingsPassword=$ARTIFACTORY_PASSWORD
+
+  release:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: Release to Bintray
+          command: ./gradlew bintrayUpload
+
+workflows:
+  version: 2
+
+  main:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - release_snapshot:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      - release:
+          requires:
+            - test
+          filters:
+            branches:
+              only: release
+
+
+
