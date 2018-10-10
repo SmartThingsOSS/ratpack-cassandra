@@ -102,9 +102,9 @@ public class CassandraService implements Service {
 	}
 
 	public Promise<ResultSet> execute(Statement statement) {
-		return Promise.async(upstream -> {
+		return Promise.async(downstream -> {
 			ResultSetFuture resultSetFuture = session.executeAsync(statement);
-			upstream.accept(resultSetFuture);
+			downstream.accept(resultSetFuture);
 		});
 	}
 
