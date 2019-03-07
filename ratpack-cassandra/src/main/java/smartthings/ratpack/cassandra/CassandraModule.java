@@ -22,7 +22,6 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 		String password;
 
 		String keyspace;
-		String validationQuery = "SELECT * FROM system.schema_keyspaces";
 
 		Boolean shareEventLoopGroup = false;
 
@@ -77,14 +76,6 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setSeeds(List<String> seeds) {
 			this.seeds = seeds;
-		}
-
-		public String getValidationQuery() {
-			return validationQuery;
-		}
-
-		public void setValidationQuery(String validationQuery) {
-			this.validationQuery = validationQuery;
 		}
 
 		public Boolean getShareEventLoopGroup() {
