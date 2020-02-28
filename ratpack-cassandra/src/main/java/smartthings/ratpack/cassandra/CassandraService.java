@@ -41,8 +41,11 @@ public class CassandraService implements Service {
 		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(1).build();
 
 		Cluster.Builder builder = Cluster.builder()
-			.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy))
-			.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
+				.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy));
+
+		if (cassandraConfig.getSpeculativeExecutionEnabled()) {
+			builder.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
+		}
 
 		if (cassandraConfig.getShareEventLoopGroup()) {
 			builder.withNettyOptions(new RatpackCassandraNettyOptions());

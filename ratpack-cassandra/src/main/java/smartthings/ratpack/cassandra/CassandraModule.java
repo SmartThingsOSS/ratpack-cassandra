@@ -28,6 +28,8 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 		String migrationFile = "/migrations/cql.changelog";
 		Boolean autoMigrate = false;
 
+		Boolean speculativeExecutionEnabled = true;
+
 		List<String> seeds;
 
 		public JKSConfig getTruststore() {
@@ -100,6 +102,14 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setAutoMigrate(Boolean autoMigrate) {
 			this.autoMigrate = autoMigrate;
+		}
+
+		public Boolean getSpeculativeExecutionEnabled() {
+			return speculativeExecutionEnabled;
+		}
+
+		public void setSpeculativeExecutionEnabled(Boolean speculativeExecutionEnabled) {
+			this.speculativeExecutionEnabled = speculativeExecutionEnabled;
 		}
 
 		public static class JKSConfig {
