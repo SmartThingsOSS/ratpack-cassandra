@@ -44,7 +44,11 @@ public class CassandraService implements Service {
 				.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy));
 
 		if (cassandraConfig.getSpeculativeExecutionEnabled()) {
-			builder.withSpeculativeExecutionPolicy(new PercentileSpeculativeExecutionPolicy(tracker, 0.99, 3));
+			builder.withSpeculativeExecutionPolicy(
+					new PercentileSpeculativeExecutionPolicy(tracker,
+							cassandraConfig.getSpeculativeRetryPercentile(),
+							cassandraConfig.getMaxSpeculativeExecutions())
+			);
 		}
 
 		if (cassandraConfig.getShareEventLoopGroup()) {

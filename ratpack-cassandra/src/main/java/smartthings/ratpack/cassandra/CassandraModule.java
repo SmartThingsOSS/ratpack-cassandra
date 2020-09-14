@@ -30,7 +30,12 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		Boolean speculativeExecutionEnabled = true;
 
+		double speculativeRetryPercentile = 99;
+
+		int maxSpeculativeExecutions = 3;
+
 		List<String> seeds;
+
 
 		public JKSConfig getTruststore() {
 			return truststore;
@@ -110,6 +115,22 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setSpeculativeExecutionEnabled(Boolean speculativeExecutionEnabled) {
 			this.speculativeExecutionEnabled = speculativeExecutionEnabled;
+		}
+
+		public Double getSpeculativeRetryPercentile() {
+			return this.speculativeRetryPercentile;
+		}
+
+		public void setSpeculativeRetryPercentile(Double speculativeRetryPercentile) {
+			this.speculativeRetryPercentile = speculativeRetryPercentile;
+		}
+
+		public int getMaxSpeculativeExecutions() {
+			return maxSpeculativeExecutions;
+		}
+
+		public void setMaxSpeculativeExecutions(int maxSpeculativeExecutions) {
+			this.maxSpeculativeExecutions = maxSpeculativeExecutions;
 		}
 
 		public static class JKSConfig {
