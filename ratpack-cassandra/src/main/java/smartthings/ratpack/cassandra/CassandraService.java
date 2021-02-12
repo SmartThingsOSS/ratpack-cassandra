@@ -38,7 +38,7 @@ public class CassandraService implements Service {
 		//Set the highest tracking to just above the socket timeout for the read.
 		PerHostPercentileTracker tracker = PerHostPercentileTracker.builder(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS + 500).build();
 
-		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(1).build();
+		DCAwareRoundRobinPolicy dcAwareRoundRobinPolicy = DCAwareRoundRobinPolicy.builder().withUsedHostsPerRemoteDc(cassandraConfig.getRemoteHostsPerDc()).build();
 
 		Cluster.Builder builder = Cluster.builder()
 				.withLoadBalancingPolicy(new TokenAwarePolicy(dcAwareRoundRobinPolicy));
