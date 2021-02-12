@@ -36,6 +36,8 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		List<String> seeds;
 
+		int remoteHostsPerDc = 1;
+
 
 		public JKSConfig getTruststore() {
 			return truststore;
@@ -131,6 +133,12 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setMaxSpeculativeExecutions(int maxSpeculativeExecutions) {
 			this.maxSpeculativeExecutions = maxSpeculativeExecutions;
+		}
+
+		public int getRemoteHostsPerDc() { return remoteHostsPerDc; }
+
+		public void setRemoteHostsPerDc(int remoteHostsPerDc) {
+			this.remoteHostsPerDc = remoteHostsPerDc;
 		}
 
 		public static class JKSConfig {
