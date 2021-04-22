@@ -24,9 +24,9 @@ deployment:
   snapshot:
     branch: master
     commands:
-      - ./gradlew publish -PsmartThingsArtifactoryUserName=$ARTIFACTORY_USERNAME -PsmartThingsArtifactoryPassword=$ARTIFACTORY_PASSWORD
+      - ./gradlew publish -PsmartThingsUserName=$ARTIFACTORY_USERNAME -PsmartThingsPassword=$ARTIFACTORY_PASSWORD
 
   release:
     branch: release
     commands:
-      - ./gradlew bintrayUpload
+      - ./gradlew publish -PsmartThingsUserName=$ARTIFACTORY_USERNAME -PsmartThingsPassword=$ARTIFACTORY_PASSWORD
