@@ -1,5 +1,4 @@
 apply plugin: "maven-publish"
-apply plugin: 'com.jfrog.bintray'
 
 ext.isSnapshot = version.endsWith("SNAPSHOT")
 
@@ -8,80 +7,27 @@ task sourceJar(type: Jar) {
   from sourceSets.main.allJava
 }
 
-if (isSnapshot) {
-	if (project.hasProperty('smartThingsArtifactoryUserName')) {
-		publishing {
-			publications {
-				main(MavenPublication) {
-					from components.java
-					artifact sourceJar
-				}
-			}
-			repositories {
-				maven {
-					credentials {
-						username smartThingsArtifactoryUserName
-						password smartThingsArtifactoryPassword
-					}
-					url "https://smartthings.jfrog.io/smartthings/libs-snapshot-local"
-				}
-			}
-		}
-	}
-} else {
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				from components.java
-				artifact sourceJar
-				pom.withXml {
-					def root = asNode()
-					// Work around gradle bug that publishes compile dependencies as runtime
-					// http://discuss.gradle.org/t/maven-publish-plugin-generated-pom-making-dependency-scope-runtime/7494/10
-					root.dependencies.'*'.findAll() {
-						it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
-							dep.name == it.artifactId.text()
-						}
-					}.each() {
-						it.scope*.value = 'compile'
-					}
-				}
-			}
-		}
-	}
-}
+publishing {
 
-bintrayUpload { task ->
-	doFirst {
-		if (isSnapshot) {
-			throw new GradleException('Cannot publish SNAPSHOT versions to BinTray!')
+	publications {
+		maven(MavenPublication) {
+			from components.java
+			artifact sourceJar
 		}
 	}
-	gradle.taskGraph.whenReady { taskGraph ->
-		if (taskGraph.hasTask(task)) {
-			task.user = System.getenv('BINTRAY_USER') ?: ''
-			task.apiKey = System.getenv('BINTRAY_API_KEY') ?: ''
-		}
-	}
-}
 
-bintray {
-	publications = ['mavenJava']
-	dryRun = false
-	publish = true
-	pkg {
-		repo = 'maven'
-		name = 'smartthings.ratpack-cassandra'
-		userOrg = 'smartthingsoss'
-		licenses = ['Apache-2.0']
-		desc = 'Working with Cassandra in Ratpack'
-		labels = ['ratpack', 'cassandra']
-		websiteUrl = 'https://github.com/SmartThingsOSS/ratpack-cassandra'
-		issueTrackerUrl = 'https://github.com/SmartThingsOSS/ratpack-cassandra/issues'
-		vcsUrl = 'https://github.com/SmartThingsOSS/ratpack-cassandra.git'
-		version {
-			name = project.version
-			vcsTag = project.version
+	repositories {
+		maven {
+			credentials {
+				username smartThingsUserName
+				password smartThingsPassword
+			}
+			if (isSnapshot) {
+				url "https://smartthingsoss.jfrog.io/artifactory/libs-snapshot-local"
+
+			} else {
+				url "https://smartthingsoss.jfrog.io/artifactory/smartthingsoss/"
+			}
 		}
 	}
 }
