@@ -1,4 +1,7 @@
 dependencies {
-	compile project(':ratpack-cassandra')
-	compile "io.ratpack:ratpack-rx:${ratpackVersion}"
+	implementation project(':ratpack-cassandra')
+	implementation "io.ratpack:ratpack-core:${ratpackVersion}"
+	implementation "io.ratpack:ratpack-guice:${ratpackVersion}"
+	implementation "io.ratpack:ratpack-rx:${ratpackVersion}"
+	implementation "com.datastax.cassandra:cassandra-driver-core:${cassDriverVersion}"
 }

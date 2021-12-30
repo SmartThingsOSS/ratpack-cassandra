@@ -1,7 +1,6 @@
 defaults: &defaults
   working_directory: ~/repo
-  docker:
-    - image: circleci/openjdk:8-jdk-browsers
+  machine: true
   environment:
     GRADLE_USER_HOME: ~/repo/.gradle
 

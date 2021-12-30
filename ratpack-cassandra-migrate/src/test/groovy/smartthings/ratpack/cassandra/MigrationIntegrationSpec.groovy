@@ -1,22 +1,36 @@
 package smartthings.ratpack.cassandra
 
 import com.datastax.driver.core.Host
-import org.cassandraunit.CassandraCQLUnit
-import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
-import org.junit.Rule
+import org.testcontainers.containers.CassandraContainer
 import ratpack.registry.internal.SimpleMutableRegistry
 import ratpack.service.StartEvent
+import spock.lang.Shared
 import spock.lang.Specification
+import org.testcontainers.spock.Testcontainers
 
+
+@Testcontainers
 class MigrationIntegrationSpec extends Specification {
 
-	@Rule
-	CassandraCQLUnit cassandraCQLUnit = new CassandraCQLUnit(new ClassPathCQLDataSet('empty.cql', 'test'))
+	@Shared
+	CassandraContainer cassandraCluster = new CassandraContainer();
+
+	@Shared
+	private String TEST_SEED = "localhost:9042"
+
+	private static final String TEST_KEYSPACE = "migration_test"
+
+	def setupSpec() {
+		TEST_SEED = "${cassandraCluster.getContainerIpAddress()}:${cassandraCluster.getMappedPort(9042)}"
+		cassandraCluster.getCluster().connect().execute("CREATE KEYSPACE IF NOT EXISTS $TEST_KEYSPACE WITH replication = \n" +
+				"{'class':'SimpleStrategy','replication_factor':'1'};")
+
+	}
 
 	def "Runs migration with SSL options"() {
 		given:
-		List<String> seeds = cassandraCQLUnit.cluster.metadata.allHosts.collect { Host host -> "${host.socketAddress.hostName}:${host.socketAddress.port}".toString() }
-		CassandraModule.Config config = new CassandraModule.Config(keyspace: 'test', migrationFile: 'changelog.txt', seeds: seeds, autoMigrate: true)
+		List<String> seeds = [TEST_SEED]
+		CassandraModule.Config config = new CassandraModule.Config(keyspace: TEST_KEYSPACE, migrationFile: 'changelog.txt', seeds: seeds, autoMigrate: true)
 		CassandraMigrationService service = new CassandraMigrationService(config)
 		StartEvent mockStartEvent = Mock()
 
@@ -38,6 +52,6 @@ class MigrationIntegrationSpec extends Specification {
 		service.onStart(mockStartEvent)
 
 		then:
-		cassandraCQLUnit.session.execute('SELECT * FROM test.a;').all().size() == 1
+		cassandraCluster.getCluster().connect().execute("SELECT * FROM ${TEST_KEYSPACE}.a;").all().size() == 1
 	}
 }
