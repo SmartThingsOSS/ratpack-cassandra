@@ -25,6 +25,8 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		Boolean shareEventLoopGroup = false;
 
+		Boolean ec2TranslationEnabled = true;
+
 		String migrationFile = "/migrations/cql.changelog";
 		Boolean autoMigrate = false;
 
@@ -113,6 +115,14 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public Boolean getSpeculativeExecutionEnabled() {
 			return speculativeExecutionEnabled;
+		}
+
+		public Boolean getEC2TranslationEnabled() {
+			return ec2TranslationEnabled;
+		}
+
+		public void setEC2TranslationEnabled(Boolean ec2TranslationEnabled) {
+			this.ec2TranslationEnabled = ec2TranslationEnabled;
 		}
 
 		public void setSpeculativeExecutionEnabled(Boolean speculativeExecutionEnabled) {

@@ -64,7 +64,9 @@ public class CassandraService implements Service {
 			}
 		}
 
-		builder.withAddressTranslator(new EC2MultiRegionAddressTranslator());
+		if (cassandraConfig.getEC2TranslationEnabled()) {
+			builder.withAddressTranslator(new EC2MultiRegionAddressTranslator());
+		}
 
 		if (cassandraConfig.truststore != null) {
 			try {
