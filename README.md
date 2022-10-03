@@ -3,3 +3,5 @@
 
 
 A project to provide a composable set of modules and services that make working with Cassandra in Ratpack easy and performant. 
+
+Note: the CI is not passing
