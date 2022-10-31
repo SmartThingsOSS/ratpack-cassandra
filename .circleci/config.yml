@@ -11,6 +11,10 @@ jobs:
     <<: *defaults
 
     steps:
+      - run:
+          name: Set java version
+          command: sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+
       - restore_cache:
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
@@ -32,6 +36,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
+
+      - run:
+          name: Set java version
+          command: sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
 
       - run:
           name: Gradle Check and Coverage
