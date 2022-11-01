@@ -81,6 +81,10 @@ public class CassandraService implements Service {
 			builder.withCredentials(cassandraConfig.user, cassandraConfig.password);
 		}
 
+		if (cassandraConfig.getProtocolVersion() != null) {
+			builder.withProtocolVersion(ProtocolVersion.fromInt(cassandraConfig.getProtocolVersion()));
+		}
+
 		cluster = builder.build();
 
 		if (cassandraConfig.keyspace != null) {

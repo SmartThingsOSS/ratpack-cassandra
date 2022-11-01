@@ -1,6 +1,8 @@
 package smartthings.ratpack.cassandra;
 
+import com.datastax.driver.core.ProtocolVersion;
 import com.google.inject.Scopes;
+import ratpack.api.Nullable;
 import ratpack.guice.ConfigurableModule;
 
 import java.util.List;
@@ -39,6 +41,8 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 		List<String> seeds;
 
 		int remoteHostsPerDc = 1;
+
+		@Nullable Integer protocolVersion = null;
 
 
 		public JKSConfig getTruststore() {
@@ -149,6 +153,14 @@ public class CassandraModule extends ConfigurableModule<CassandraModule.Config> 
 
 		public void setRemoteHostsPerDc(int remoteHostsPerDc) {
 			this.remoteHostsPerDc = remoteHostsPerDc;
+		}
+
+		@Nullable public Integer getProtocolVersion() {
+			return protocolVersion;
+		}
+
+		public void setProtocolVersion(@Nullable Integer protocolVersion) {
+			this.protocolVersion = protocolVersion;
 		}
 
 		public static class JKSConfig {
